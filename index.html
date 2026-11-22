@@ -148,6 +148,11 @@ textarea{height:46vh;font-size:13px}
     </div>
   </div>
 
+  <div class="card" id="moneyCard">
+    <div class="lrow"><h2 style="margin:0">Деньги сейчас</h2><button id="moneyEdit">Указать</button></div>
+    <div id="money"></div>
+  </div>
+
   <div class="card" id="splitCard" hidden>
     <h2>Даня и Аля</h2>
     <div id="split"></div>
@@ -224,6 +229,21 @@ textarea{height:46vh;font-size:13px}
   </div>
 </div>
 
+<div class="sheet-bg" id="balBg">
+  <div class="sheet" role="dialog" aria-label="Деньги сейчас">
+    <div class="seg" id="balWho">
+      <button data-w="d">Даня</button>
+      <button data-w="a">Аля</button>
+    </div>
+    <label for="balAcc">На счетах, ₸</label>
+    <input id="balAcc" class="amount" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <label for="balCash">Наличными, ₸</label>
+    <input id="balCash" class="amount" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <button class="save" id="balSave">Сохранить</button>
+    <button class="cancel" id="balCancel">Отмена</button>
+  </div>
+</div>
+
 <div class="sheet-bg" id="iosBg">
   <div class="sheet">
     <h2 style="margin-bottom:6px">Как добавить на экран</h2>
@@ -256,6 +276,7 @@ textarea{height:46vh;font-size:13px}
   var MSHORT=["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"];
   var $=function(id){return document.getElementById(id)};
   var txs=[];
+  var bals={d:{account:0,cash:0,ts:null},a:{account:0,cash:0,ts:null}};
   var now=new Date();
   var cur={y:now.getFullYear(),m:now.getMonth()};
   var tab="d",me=null;
@@ -294,6 +315,7 @@ textarea{height:46vh;font-size:13px}
     $("balLabel").textContent=isAll?"Общий остаток за месяц":"Остаток за месяц: "+PEOPLE[tab];
     var b=$("bal");b.textContent=(bal>0?"+":"")+fmt(bal);b.className="bal "+(bal<0?"exp":"");
     $("inc").textContent=fmt(T.inc);$("exp").textContent=fmt(T.exp);
+    renderMoney(isAll);
     $("splitCard").hidden=!isAll;$("statsCard").hidden=!isAll;$("topCard").hidden=!isAll;
     $("whoChips").hidden=!isAll;$("exportBtns").hidden=!isAll;
     $("listTitle").textContent=isAll?"Выписка — все операции":"Операции";
@@ -301,6 +323,27 @@ textarea{height:46vh;font-size:13px}
     renderCats(base,T,isAll);renderTrend();renderFilters(base,isAll);renderList(base);
   }
 
+  function renderMoney(isAll){
+    var box=$("money");box.textContent="";
+    var ws=isAll?["d","a"]:[tab];
+    var acc=0,cash=0,last=0;
+    ws.forEach(function(w){acc+=bals[w].account;cash+=bals[w].cash;last=Math.max(last,bals[w].ts||0)});
+    function line(l,v,strong){
+      var r=el("div","lrow");r.style.padding="6px 0";
+      r.appendChild(el("span",null,l));
+      var s=el("span",null,fmt(v));if(strong){s.style.fontWeight="800";s.style.fontSize="20px"}else s.style.fontWeight="700";
+      r.appendChild(s);box.appendChild(r);
+    }
+    line("На счетах",acc);line("Наличными",cash);line("Всего",acc+cash,true);
+    if(isAll){
+      ws.forEach(function(w){
+        var b=bals[w],r=el("div","bal-label",PEOPLE[w]+": счета "+fmt(b.account)+", наличные "+fmt(b.cash));
+        r.style.marginTop="4px";box.appendChild(r);
+      });
+    }
+    if(last){var u=el("div","bal-label","Обновлено "+stamp(last));u.style.marginTop="6px";box.appendChild(u)}
+    $("moneyEdit").textContent=last?"Изменить":"Указать";
+  }
   function renderSplit(base,T){
     var box=$("split");box.textContent="";
     ["d","a"].forEach(function(w){
@@ -436,10 +479,14 @@ textarea{height:46vh;font-size:13px}
   function loadAll(){
     return Promise.all([
       sb.from("tx").select("*").order("date",{ascending:false}).limit(10000),
-      sb.from("cats").select("*")
+      sb.from("cats").select("*"),
+      sb.from("balances").select("*")
     ]).then(function(res){
       if(res[0].error){setStatus("Не удалось загрузить операции.");return}
       txs=(res[0].data||[]).map(mapRow);
+      if(!res[2].error)(res[2].data||[]).forEach(function(b){
+        if(bals[b.who])bals[b.who]={account:Number(b.account)||0,cash:Number(b.cash)||0,ts:b.ts==null?null:Number(b.ts)};
+      });
       (res[1].data||[]).forEach(function(c){
         if((c.kind==="expense"||c.kind==="income")&&Array.isArray(c.items)&&c.items.length)cats[c.kind]=c.items.slice();
       });
@@ -521,6 +568,34 @@ textarea{height:46vh;font-size:13px}
       closeSheet();loadAll().then(render);
     },function(){$("save").disabled=false;setStatus("Нет связи, операция не сохранена.")});
   };
+  /* ---------- деньги сейчас: счета и наличные ---------- */
+  var balWho="d";
+  function num(v){var n=parseFloat(String(v).replace(/\s/g,"").replace(",","."));return isFinite(n)&&n>=0?n:0}
+  function fillBal(){
+    Array.prototype.forEach.call($("balWho").children,function(b){b.classList.toggle("on",b.getAttribute("data-w")===balWho)});
+    var b=bals[balWho];
+    $("balAcc").value=b.account?String(b.account).replace(".",","):"";
+    $("balCash").value=b.cash?String(b.cash).replace(".",","):"";
+  }
+  $("moneyEdit").onclick=function(){
+    balWho=(tab==="d"||tab==="a")?tab:(me||"d");
+    fillBal();$("balBg").classList.add("open");
+    setTimeout(function(){$("balAcc").focus()},50);
+  };
+  $("balWho").addEventListener("click",function(e){var w=e.target.getAttribute("data-w");if(!w)return;balWho=w;fillBal()});
+  $("balCancel").onclick=function(){$("balBg").classList.remove("open")};
+  $("balBg").addEventListener("click",function(e){if(e.target===$("balBg"))$("balBg").classList.remove("open")});
+  $("balSave").onclick=function(){
+    var rec={who:balWho,account:num($("balAcc").value),cash:num($("balCash").value),ts:Date.now()};
+    $("balSave").disabled=true;
+    sb.from("balances").upsert(rec).then(function(r){
+      $("balSave").disabled=false;
+      $("balBg").classList.remove("open");
+      if(r.error){setStatus("Не удалось сохранить остатки: "+r.error.message);return}
+      loadAll().then(render);
+    },function(){$("balSave").disabled=false;setStatus("Нет связи, остатки не сохранены.")});
+  };
+
   var delArm=false;
   $("delBtn").onclick=function(){
     var b=$("delBtn");
@@ -600,7 +675,7 @@ textarea{height:46vh;font-size:13px}
       loadAll();
       try{
         var rt=null;
-        sb.channel("fb-live").on("postgres_changes",{event:"*",schema:"public",table:"tx"},function(){clearTimeout(rt);rt=setTimeout(loadAll,250)})
+        sb.channel("fb-live").on("postgres_changes",{event:"*",schema:"public",table:"balances"},function(){clearTimeout(rt);rt=setTimeout(loadAll,250)}).on("postgres_changes",{event:"*",schema:"public",table:"tx"},function(){clearTimeout(rt);rt=setTimeout(loadAll,250)})
           .on("postgres_changes",{event:"*",schema:"public",table:"cats"},function(){clearTimeout(rt);rt=setTimeout(loadAll,250)})
           .subscribe();
       }catch(e){}
