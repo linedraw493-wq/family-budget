@@ -95,6 +95,8 @@ h2{font-size:13px;color:var(--mute);font-weight:600;margin:0 0 14px;text-transfo
 .acc .an{flex:1;min-width:0;font-weight:600;font-size:15px}
 .acc .an small{display:block;color:var(--mute);font-weight:500;font-size:12px}
 .acc .av{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.grp{display:flex;justify-content:space-between;align-items:center;background:var(--chip);border-radius:14px;padding:9px 12px;margin:12px 0 2px;font-weight:700;font-size:14.5px}
+.grp .gs{font-variant-numeric:tabular-nums}
 .abtns{display:flex;gap:8px;margin-top:12px}
 .abtns button{flex:1;border:0;border-radius:16px;padding:12px;font-size:14.5px;font-weight:600;background:var(--chip);color:var(--ink)}
 .abtns button.p{background:var(--btn);color:var(--btn-ink);box-shadow:var(--gel)}
@@ -471,14 +473,27 @@ textarea{height:46vh;font-size:13px}
     box.appendChild(tg);
     if(showDetail){
       var d=el("div");d.style.marginTop="6px";
-      list.forEach(function(a){
-        var r=el("div","acc");
-        r.appendChild(el("div","ico",KIND_ICO[a.kind]||"💳"));
-        var n=el("div","an",a.name);n.appendChild(el("small",null,KIND_NAME[a.kind]+(isAll?" · "+owner(a.who):"")));
-        r.appendChild(n);
-        var v=balanceOf(a);
-        var av=el("div","av",fmt(v));if(v<0)av.className="av exp";
-        r.appendChild(av);d.appendChild(r);
+      var groups=isAll?["d","a","s"]:[tab];
+      groups.forEach(function(w){
+        var gl=list.filter(function(a){return a.who===w});
+        if(!gl.length)return;
+        var sub=0;gl.forEach(function(a){sub+=balanceOf(a)});
+        if(isAll){
+          var h=el("div","grp");
+          var nm=el("span",null,owner(w));
+          if(w==="d"||w==="a"){var dt=el("span","dot "+w);nm.insertBefore(dt,nm.firstChild)}
+          h.appendChild(nm);h.appendChild(el("span","gs",fmt(sub)));
+          d.appendChild(h);
+        }
+        gl.forEach(function(a){
+          var r=el("div","acc");
+          r.appendChild(el("div","ico",KIND_ICO[a.kind]||"💳"));
+          var n=el("div","an",a.name);n.appendChild(el("small",null,KIND_NAME[a.kind]));
+          r.appendChild(n);
+          var v=balanceOf(a);
+          var av=el("div","av",fmt(v));if(v<0)av.className="av exp";
+          r.appendChild(av);d.appendChild(r);
+        });
       });
       box.appendChild(d);
     }
