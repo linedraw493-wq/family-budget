@@ -188,10 +188,6 @@ textarea{height:46vh;font-size:13px}
 .topbar{display:flex;align-items:center;gap:12px;margin:0 0 12px}
 .topbar button{background:var(--card);border:0;color:var(--ink);width:42px;height:42px;border-radius:50%;font-size:19px;box-shadow:var(--shadow);line-height:1}
 .topbar .ttl{font-weight:700;font-size:18px;letter-spacing:-.01em}
-.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;z-index:12}
-.drawer-bg.open{display:block}
-.drawer{position:absolute;left:0;top:0;bottom:0;width:min(84vw,330px);background:var(--card);padding:max(18px,env(safe-area-inset-top)) 18px 24px;overflow:auto;border-radius:0 28px 28px 0}
-.drawer h1{font-size:22px;margin:4px 0 14px}
 .mi{display:block;width:100%;text-align:left;border:0;background:var(--chip);color:var(--ink);border-radius:16px;padding:14px;font-size:15px;font-weight:600;margin-bottom:8px}
 .chk{display:flex;align-items:center;gap:12px;margin:0 0 8px;padding:12px 14px;background:var(--chip);border-radius:16px;font-size:15px;font-weight:600;color:var(--ink)}
 .chk input{width:22px;height:22px;padding:0;flex:none;accent-color:var(--acc)}
@@ -209,6 +205,47 @@ textarea{height:46vh;font-size:13px}
 .loan .sub{font-size:12px;color:var(--mute);margin-top:6px}
 .loan .bar i{background:linear-gradient(90deg,#cfe8c9,var(--inc))}
 .lim.over .bar i{background:linear-gradient(90deg,#f3cbbd,var(--exp))}
+
+/* ===== спокойный стиль (v2) ===== */
+:root{--bg:#f4f2ee;--card:#ffffff;--ink:#23201b;--mute:#8d867b;--line:#e9e5de;--acc:#a9783f;--chip:#f1eee8;--shadow:none;--gel:none;--btn:#a9783f;--btn-ink:#ffffff;--btn-shadow:0 6px 14px rgba(120,80,30,.30);--glass:#ffffff;--exp:#cf5a4a;--inc:#3b9566}
+@media (prefers-color-scheme:dark){:root{--bg:#17140f;--card:#211d17;--ink:#f3ede3;--mute:#a1978a;--line:#322c24;--acc:#d3a56b;--chip:#2b251d;--btn:#d3a56b;--btn-ink:#1d1710;--btn-shadow:0 6px 14px rgba(0,0,0,.4);--glass:#211d17;--exp:#ff8a78;--inc:#6fd19b}}
+body::before{display:none}
+.wrap{padding-bottom:calc(230px + env(safe-area-inset-bottom))}
+.card,.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:none}
+.hero{color:var(--ink);padding:16px}
+.hero::before{display:none}
+.hero .hl,.hero .hs{color:var(--mute)}
+.hero .hb{font-size:34px}
+.pills{display:none}
+.month button{box-shadow:none;border:1px solid var(--line)}
+.vtitle{font-size:22px;font-weight:700;margin:4px 0 12px}
+.tabs{display:flex;gap:6px;background:none;border:0;box-shadow:none;padding:0;position:static;margin-bottom:12px;-webkit-backdrop-filter:none;backdrop-filter:none}
+.tabs button{flex:none;background:var(--card);border:1px solid var(--line);color:var(--mute);border-radius:16px;padding:7px 14px;font-size:13.5px}
+.tabs button.on,.fchips button.on{background:var(--ink);color:var(--bg);border-color:var(--ink);box-shadow:none}
+.fchips button{background:var(--card);border:1px solid var(--line);color:var(--mute)}
+.seg button.on{box-shadow:none;border:1px solid var(--line)}
+.ico,.ct.on .ico{box-shadow:none}
+.ct.on .ico{background:var(--acc);transform:none}
+.bar i,.bar i.d,.bar i.a{background:var(--acc)}
+.bar i.d{background:var(--pd)}.bar i.a{background:var(--pa)}
+.loan .bar i{background:var(--inc)}
+.lim.over .bar i{background:var(--exp)}
+.fbig{font-size:32px}
+.save,.fab,.abtns button.p,.install button.go{box-shadow:var(--btn-shadow)}
+.abtns button.p{background:var(--chip);color:var(--ink);box-shadow:none}
+.fab{left:auto;right:16px;bottom:calc(138px + env(safe-area-inset-bottom));height:48px;padding:0 20px;font-size:15px}
+.sec{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin:18px 2px 8px;font-weight:600}
+.mi{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line)}
+.mi .e{width:30px;height:30px;border-radius:10px;background:var(--chip);display:flex;align-items:center;justify-content:center;font-size:15px;flex:none}
+.mi .go{margin-left:auto;color:var(--mute);font-weight:500;font-size:13px}
+.chk{background:var(--card);border:1px solid var(--line)}
+.install{box-shadow:none;border:1px solid var(--line)}
+/* нижняя панель: поднята над плашкой Netlify (она справа внизу, ~60px) */
+.nav{position:fixed;left:14px;right:14px;max-width:532px;margin:0 auto;bottom:calc(66px + env(safe-area-inset-bottom));background:var(--card);border:1px solid var(--line);border-radius:22px;display:flex;padding:5px;z-index:6;box-shadow:0 6px 22px rgba(0,0,0,.12)}
+.nav button{flex:1;border:0;background:none;color:var(--mute);font-size:11px;font-weight:600;padding:6px 0 4px;border-radius:17px}
+.nav button i{display:block;font-style:normal;font-size:20px;line-height:1.2;filter:grayscale(1);opacity:.6}
+.nav button.on{color:var(--acc);background:var(--chip)}
+.nav button.on i{filter:none;opacity:1}
 </style>
 </head>
 <body>
@@ -219,19 +256,82 @@ textarea{height:46vh;font-size:13px}
 </div>
 
 <div class="wrap" id="app" hidden>
-  <div class="topbar"><button id="menuBtn" aria-label="Меню">☰</button><div class="ttl">Семейный бюджет</div></div>
+  <div class="month" id="monthRow">
+    <button id="prev" aria-label="Предыдущий месяц">‹</button>
+    <div class="name" id="mname"></div>
+    <button id="next" aria-label="Следующий месяц">›</button>
+  </div>
+  <div class="vtitle" id="vtitle" hidden></div>
   <div class="tabs" id="tabs">
+    <button data-tab="all">Мы</button>
     <button data-tab="d">Даня</button>
     <button data-tab="a">Аля</button>
-    <button data-tab="all">Общие</button>
-    <button data-tab="loans">Кредиты</button>
   </div>
   <div id="status" class="note" hidden></div>
+
+  <div id="homeView">
+    <div class="card" id="freeCard">
+      <h2>Свободно в этом месяце</h2>
+      <div class="fbig" id="free">0 ₸</div>
+      <div id="freeRows" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card" id="moneyCard">
+      <div class="lrow"><h2 id="balLabel" style="margin:0">Остаток на счетах</h2><button class="lb2" id="moneyEdit">Изменить</button></div>
+      <div class="fbig" id="bal" style="margin-top:6px">0 ₸</div>
+      <div class="hint" id="balSub"></div>
+      <div id="pills" hidden></div>
+      <div id="money" style="margin-top:8px"></div>
+      <div class="abtns">
+        <button class="p" id="xferBtn">⇄ Перевод между счетами</button>
+      </div>
+    </div>
+
+    <div class="card" id="splitCard" hidden>
+      <h2>Даня и Аля</h2>
+      <div id="split"></div>
+    </div>
+
+    <div class="card" id="limCard" hidden>
+      <h2>Лимиты на месяц</h2>
+      <div id="limList"></div>
+    </div>
+
+    <div class="card">
+      <h2>Расходы по категориям</h2>
+      <div id="cats"></div>
+    </div>
+
+    <div class="card" id="statsCard" hidden>
+      <h2>Статистика покупок</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="card" id="topCard" hidden>
+      <h2>Самые крупные покупки</h2>
+      <div id="top"></div>
+    </div>
+
+    <div class="card" id="trendCard" hidden>
+      <h2>Расходы и доходы за 6 месяцев</h2>
+      <div class="trend" id="trend"></div>
+      <div class="legend"><span class="dot" style="background:var(--exp)"></span>расходы &nbsp; <span class="dot" style="background:var(--inc)"></span>доходы</div>
+    </div>
+  </div>
+
+  <div id="opsView" hidden>
+    <div class="card">
+      <h2 id="listTitle">Операции</h2>
+      <div class="fchips" id="whoChips" hidden></div>
+      <div class="fchips" id="catChips"></div>
+      <div id="list"></div>
+    </div>
+  </div>
 
   <div id="loansView" hidden>
     <div class="fchips" id="lFilter"></div>
     <div class="hero">
-      <div class="hl">В месяц платить</div>
+      <div class="hl">Платить в месяц</div>
       <div class="hb" id="lMonth">0 ₸</div>
       <div class="hs" id="lSub"></div>
       <div class="pills" id="lPills"></div>
@@ -239,90 +339,38 @@ textarea{height:46vh;font-size:13px}
     <div id="lList"></div>
   </div>
 
-  <div id="mainView">
-  <div class="month">
-    <button id="prev" aria-label="Предыдущий месяц">‹</button>
-    <div class="name" id="mname"></div>
-    <button id="next" aria-label="Следующий месяц">›</button>
-  </div>
-
-  <div class="tiles">
-    <div class="tile i"><div class="ti">↓</div><div class="l">Доходы</div><div class="v" id="inc">0 ₸</div></div>
-    <div class="tile e"><div class="ti">↑</div><div class="l">Расходы</div><div class="v" id="exp">0 ₸</div></div>
-  </div>
-
-  <div class="hero">
-    <div class="hl" id="balLabel">Остаток на счетах</div>
-    <div class="hb" id="bal">0 ₸</div>
-    <div class="hs" id="balSub"></div>
-    <div class="pills" id="pills"></div>
-  </div>
-
-  <div class="card" id="freeCard">
-    <h2>Свободно в этом месяце</h2>
-    <div class="fbig" id="free">0 ₸</div>
-    <div id="freeRows" style="margin-top:10px"></div>
-  </div>
-
-  <div class="card" id="moneyCard">
-    <div class="lrow"><h2 style="margin:0">Счета</h2><button class="lb2" id="moneyEdit">Изменить</button></div>
-    <div id="money" style="margin-top:8px"></div>
-    <div class="abtns">
-      <button class="p" id="xferBtn">⇄ Перевод между счетами</button>
-    </div>
-  </div>
-
-  <div class="card" id="splitCard" hidden>
-    <h2>Даня и Аля</h2>
-    <div id="split"></div>
-  </div>
-
-  <div class="card" id="limCard" hidden>
-    <h2>Лимиты на месяц</h2>
-    <div id="limList"></div>
-  </div>
-
-  <div class="card">
-    <h2>Расходы по категориям</h2>
-    <div id="cats"></div>
-  </div>
-
-  <div class="card" id="statsCard" hidden>
-    <h2>Статистика покупок</h2>
-    <div class="stats" id="stats"></div>
-  </div>
-
-  <div class="card" id="topCard" hidden>
-    <h2>Самые крупные покупки</h2>
-    <div id="top"></div>
-  </div>
-
-  <div class="card" id="trendCard" hidden>
-    <h2>Расходы и доходы за 6 месяцев</h2>
-    <div class="trend" id="trend"></div>
-    <div class="legend"><span class="dot" style="background:var(--exp)"></span>расходы &nbsp; <span class="dot" style="background:var(--inc)"></span>доходы</div>
-  </div>
-
-  <div class="card">
-    <h2 id="listTitle">Операции</h2>
-    <div class="fchips" id="whoChips" hidden></div>
-    <div class="fchips" id="catChips"></div>
-    <div id="list"></div>
-    <div class="btns" id="exportBtns" hidden>
-      <button class="btn" id="csvMonth">Выписка за месяц (CSV)</button>
+  <div id="moreView" hidden>
+    <div class="sec">Разделы</div>
+    <button class="mi" id="miRec"><span class="e">🔁</span>Регулярные платежи<span class="go" id="miRecSub"></span></button>
+    <button class="mi" id="miLim"><span class="e">🎯</span>Лимиты по категориям<span class="go" id="miLimSub"></span></button>
+    <div class="sec">Показывать на главной</div>
+    <label class="chk"><input type="checkbox" id="shStats"> Статистика покупок</label>
+    <label class="chk"><input type="checkbox" id="shTop"> Самые крупные покупки</label>
+    <label class="chk"><input type="checkbox" id="shTrend"> График за 6 месяцев</label>
+    <div class="hint">Статистика и крупные покупки видны при выборе «Мы».</div>
+    <div class="sec">Выписка</div>
+    <div class="btns" style="margin-top:0">
+      <button class="btn" id="csvMonth">За месяц (CSV)</button>
       <button class="btn" id="csvAll">Вся история (CSV)</button>
       <button class="btn" id="copyTxt">Скопировать текстом</button>
     </div>
+    <div class="sec">Приложение</div>
+    <div class="install" id="installCard" hidden>
+      <div class="t">Добавить на главный экран<small>Откроется как обычное приложение</small></div>
+      <button class="go" id="installBtn">Добавить</button>
+      <button class="x" id="installX" aria-label="Скрыть">✕</button>
+    </div>
+    <button class="mi" id="installLink" hidden><span class="e">＋</span>Добавить на главный экран</button>
+    <div class="bal-label" style="text-align:center;margin-top:14px">Данные общие для Дани и Али</div>
+    <button class="logout" id="logout">Выйти на этом устройстве</button>
   </div>
+
+  <div class="nav" id="nav">
+    <button data-v="home"><i>🏠</i>Главная</button>
+    <button data-v="loans"><i>🏦</i>Кредиты</button>
+    <button data-v="ops"><i>🧾</i>Операции</button>
+    <button data-v="more"><i>⋯</i>Ещё</button>
   </div>
-  <div class="install" id="installCard" hidden>
-    <div class="t">Добавить на главный экран<small>Откроется как обычное приложение</small></div>
-    <button class="go" id="installBtn">Добавить</button>
-    <button class="x" id="installX" aria-label="Скрыть">✕</button>
-  </div>
-  <button class="logout" id="installLink" hidden style="color:var(--acc)">＋ Добавить на главный экран</button>
-  <div class="bal-label" style="text-align:center;margin-top:10px">Данные общие для Дани и Али</div>
-  <button class="logout" id="logout">Выйти на этом устройстве</button>
 </div>
 <button class="fab" id="add" hidden>＋ Добавить</button>
 
@@ -399,21 +447,6 @@ textarea{height:46vh;font-size:13px}
     <label>Выписка: выдели весь текст и скопируй</label>
     <textarea id="txtOut" readonly></textarea>
     <button class="cancel" id="txtClose">Закрыть</button>
-  </div>
-</div>
-
-<div class="drawer-bg" id="menuBg">
-  <div class="drawer">
-    <h1>Меню</h1>
-    <h2>Разделы</h2>
-    <button class="mi" id="miRec">🔁 Регулярные платежи</button>
-    <button class="mi" id="miLim">🎯 Лимиты по категориям</button>
-    <h2 style="margin-top:18px">Показывать на главной</h2>
-    <label class="chk"><input type="checkbox" id="shStats"> Статистика покупок</label>
-    <label class="chk"><input type="checkbox" id="shTop"> Самые крупные покупки</label>
-    <label class="chk"><input type="checkbox" id="shTrend"> Расходы и доходы за 6 месяцев</label>
-    <div class="hint">Статистика и крупные покупки видны на вкладке «Общие».</div>
-    <button class="cancel" id="menuClose" style="margin-top:14px">Закрыть</button>
   </div>
 </div>
 
@@ -513,7 +546,8 @@ textarea{height:46vh;font-size:13px}
 
   function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-  var st=lsGet("bt_tab");if(st==="d"||st==="a"||st==="all"||st==="loans")tab=st;
+  var st=lsGet("bt_tab");if(st==="d"||st==="a"||st==="all")tab=st;
+  var view=lsGet("bt_view");if(["home","ops","loans","more"].indexOf(view)<0)view="home";
   var show={stats:false,top:false,trend:false};
   try{var sh=JSON.parse(lsGet("bt_show")||"{}");["stats","top","trend"].forEach(function(k){show[k]=sh[k]===true})}catch(e){}
   var loans=[],recs=[],limits={},recTried={};
@@ -568,21 +602,25 @@ textarea{height:46vh;font-size:13px}
 
   function render(){
     renderTabs();
-    var isLoans=tab==="loans";
-    $("mainView").hidden=isLoans;$("loansView").hidden=!isLoans;
-    $("add").textContent=isLoans?"＋ Долг":"＋ Добавить";
-    if(isLoans){renderLoans();return}
+    var pv=view==="home"||view==="ops";
+    ["home","ops","loans","more"].forEach(function(v){$(v+"View").hidden=view!==v});
+    Array.prototype.forEach.call($("nav").children,function(b){b.classList.toggle("on",b.getAttribute("data-v")===view)});
+    $("monthRow").hidden=!pv;$("tabs").hidden=!pv;
+    $("vtitle").hidden=pv;$("vtitle").textContent=view==="loans"?"Кредиты":"Ещё";
+    $("add").hidden=view==="more";
+    $("add").textContent=view==="loans"?"＋ Долг":"＋ Добавить";
+    if(view==="loans"){renderLoans();return}
+    if(view==="more"){renderMore();return}
     $("mname").textContent=MONTHS[cur.m]+" "+cur.y;
     var isAll=tab==="all";
     var base=inMonth(scope(),cur.y,cur.m);
     var T=totals(base);
-    $("inc").textContent=fmt(T.inc);$("exp").textContent=fmt(T.exp);
     renderMoney(isAll,T);
     renderFree(base,T);renderLimits(isAll,base);
     $("trendCard").hidden=!show.trend;
     $("splitCard").hidden=!isAll;$("statsCard").hidden=!(isAll&&show.stats);$("topCard").hidden=!(isAll&&show.top);
-    $("whoChips").hidden=!isAll;$("exportBtns").hidden=!isAll;
-    $("listTitle").textContent=isAll?"Выписка — все операции":"Операции";
+    $("whoChips").hidden=true;
+    $("listTitle").textContent=isAll?"Все операции":"Операции";
     if(isAll){renderSplit(base,T);if(show.stats)renderStats(base,T);if(show.top)renderTop(base)}
     renderCats(base,T,isAll);renderTrend();renderFilters(base,isAll);renderList(base);
   }
@@ -596,7 +634,7 @@ textarea{height:46vh;font-size:13px}
     if(isAll){["d","a","s"].forEach(function(w){list=list.concat(accOf(w))})}else list=accOf(tab);
     var total=0;list.forEach(function(a){total+=balanceOf(a)});
     $("balLabel").textContent=isAll?"Остаток на всех счетах":"Остаток на счетах: "+PEOPLE[tab];
-    var b=$("bal");b.textContent=fmt(total);b.className="hb"+(total<0?" neg":"");
+    var b=$("bal");b.textContent=fmt(total);b.className="fbig"+(total<0?" neg":"");
     var net=T.inc-T.exp;
     $("balSub").textContent="за месяц: "+(net>0?"+":"")+fmt(net);
     var sums={},names={};
@@ -897,7 +935,7 @@ textarea{height:46vh;font-size:13px}
     $("newCat").value="";form.cat=v;drawSheet();
   };
   $("newCat").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("addCatBtn").click()}});
-  $("add").onclick=function(){if(tab==="loans")openLoan(null);else openSheet(null)};
+  $("add").onclick=function(){if(view==="loans")openLoan(null);else openSheet(null)};
   $("xferBtn").onclick=function(){openSheet(null,true)};
   $("cancel").onclick=closeSheet;
   $("bg").addEventListener("click",function(e){if(e.target===$("bg"))closeSheet()});
@@ -1283,17 +1321,24 @@ textarea{height:46vh;font-size:13px}
     },function(){$("limSave").disabled=false;setStatus("Нет связи, лимиты не сохранены.")});
   };
 
-  /* ---------- боковое меню ---------- */
-  function openMenu(){$("shStats").checked=show.stats;$("shTop").checked=show.top;$("shTrend").checked=show.trend;$("menuBg").classList.add("open")}
-  function closeMenu(){$("menuBg").classList.remove("open")}
-  $("menuBtn").onclick=openMenu;
-  $("menuClose").onclick=closeMenu;
-  $("menuBg").addEventListener("click",function(e){if(e.target===$("menuBg"))closeMenu()});
+  /* ---------- вкладка «Ещё» и нижняя панель ---------- */
+  function renderMore(){
+    $("shStats").checked=show.stats;$("shTop").checked=show.top;$("shTrend").checked=show.trend;
+    var rt=0;recs.forEach(function(r){rt+=r.amount});
+    $("miRecSub").textContent=recs.length?recs.length+" · "+fmt(rt)+" / мес":"пока нет";
+    var ln=Object.keys(limits).filter(function(c){return limits[c]>0}).length;
+    $("miLimSub").textContent=ln?String(ln):"не заданы";
+  }
   [["shStats","stats"],["shTop","top"],["shTrend","trend"]].forEach(function(p){
-    $(p[0]).onchange=function(){show[p[1]]=this.checked;lsSet("bt_show",JSON.stringify(show));render()};
+    $(p[0]).onchange=function(){show[p[1]]=this.checked;lsSet("bt_show",JSON.stringify(show))};
   });
-  $("miRec").onclick=function(){closeMenu();openRec()};
-  $("miLim").onclick=function(){closeMenu();openLim()};
+  $("miRec").onclick=openRec;
+  $("miLim").onclick=openLim;
+  $("nav").addEventListener("click",function(e){
+    var b=e.target.closest?e.target.closest("button"):null;if(!b)return;
+    var v=b.getAttribute("data-v");if(!v)return;
+    view=v;lsSet("bt_view",v);window.scrollTo(0,0);render();
+  });
 
   var delArm=false;
   $("delBtn").onclick=function(){
