@@ -183,6 +183,32 @@ textarea{height:46vh;font-size:13px}
 .login{max-width:380px;margin:14vh auto 0;padding:0 18px;text-align:center}
 .bal-label{color:var(--mute);font-size:13px}
 .logout{background:none;border:0;color:var(--mute);font-size:13px;padding:8px;margin:6px auto 0;display:block}
+
+/* верхняя строка и боковое меню */
+.topbar{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.topbar button{background:var(--card);border:0;color:var(--ink);width:42px;height:42px;border-radius:50%;font-size:19px;box-shadow:var(--shadow);line-height:1}
+.topbar .ttl{font-weight:700;font-size:18px;letter-spacing:-.01em}
+.drawer-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:none;z-index:12}
+.drawer-bg.open{display:block}
+.drawer{position:absolute;left:0;top:0;bottom:0;width:min(84vw,330px);background:var(--card);padding:max(18px,env(safe-area-inset-top)) 18px 24px;overflow:auto;border-radius:0 28px 28px 0}
+.drawer h1{font-size:22px;margin:4px 0 14px}
+.mi{display:block;width:100%;text-align:left;border:0;background:var(--chip);color:var(--ink);border-radius:16px;padding:14px;font-size:15px;font-weight:600;margin-bottom:8px}
+.chk{display:flex;align-items:center;gap:12px;margin:0 0 8px;padding:12px 14px;background:var(--chip);border-radius:16px;font-size:15px;font-weight:600;color:var(--ink)}
+.chk input{width:22px;height:22px;padding:0;flex:none;accent-color:var(--acc)}
+/* свободно */
+.fbig{font-size:34px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.fbig.neg{color:var(--exp)}
+.frow{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-top:1px solid var(--line);font-size:14.5px}
+.frow span:first-child{color:var(--mute)}
+.frow span:last-child{font-weight:600;font-variant-numeric:tabular-nums}
+.hint{font-size:12px;color:var(--mute);margin-top:5px}
+/* кредиты */
+.loan{border-top:1px solid var(--line);padding:4px 0 12px;cursor:pointer}
+.loan:first-of-type{border-top:0}
+.loan .acc{border-top:0;padding-bottom:6px}
+.loan .sub{font-size:12px;color:var(--mute);margin-top:6px}
+.loan .bar i{background:linear-gradient(90deg,#cfe8c9,var(--inc))}
+.lim.over .bar i{background:linear-gradient(90deg,#f3cbbd,var(--exp))}
 </style>
 </head>
 <body>
@@ -193,13 +219,27 @@ textarea{height:46vh;font-size:13px}
 </div>
 
 <div class="wrap" id="app" hidden>
+  <div class="topbar"><button id="menuBtn" aria-label="Меню">☰</button><div class="ttl">Семейный бюджет</div></div>
   <div class="tabs" id="tabs">
     <button data-tab="d">Даня</button>
     <button data-tab="a">Аля</button>
     <button data-tab="all">Общие</button>
+    <button data-tab="loans">Кредиты</button>
   </div>
   <div id="status" class="note" hidden></div>
 
+  <div id="loansView" hidden>
+    <div class="fchips" id="lFilter"></div>
+    <div class="hero">
+      <div class="hl">В месяц платить</div>
+      <div class="hb" id="lMonth">0 ₸</div>
+      <div class="hs" id="lSub"></div>
+      <div class="pills" id="lPills"></div>
+    </div>
+    <div id="lList"></div>
+  </div>
+
+  <div id="mainView">
   <div class="month">
     <button id="prev" aria-label="Предыдущий месяц">‹</button>
     <div class="name" id="mname"></div>
@@ -218,6 +258,12 @@ textarea{height:46vh;font-size:13px}
     <div class="pills" id="pills"></div>
   </div>
 
+  <div class="card" id="freeCard">
+    <h2>Свободно в этом месяце</h2>
+    <div class="fbig" id="free">0 ₸</div>
+    <div id="freeRows" style="margin-top:10px"></div>
+  </div>
+
   <div class="card" id="moneyCard">
     <div class="lrow"><h2 style="margin:0">Счета</h2><button class="lb2" id="moneyEdit">Изменить</button></div>
     <div id="money" style="margin-top:8px"></div>
@@ -229,6 +275,11 @@ textarea{height:46vh;font-size:13px}
   <div class="card" id="splitCard" hidden>
     <h2>Даня и Аля</h2>
     <div id="split"></div>
+  </div>
+
+  <div class="card" id="limCard" hidden>
+    <h2>Лимиты на месяц</h2>
+    <div id="limList"></div>
   </div>
 
   <div class="card">
@@ -246,7 +297,7 @@ textarea{height:46vh;font-size:13px}
     <div id="top"></div>
   </div>
 
-  <div class="card">
+  <div class="card" id="trendCard" hidden>
     <h2>Расходы и доходы за 6 месяцев</h2>
     <div class="trend" id="trend"></div>
     <div class="legend"><span class="dot" style="background:var(--exp)"></span>расходы &nbsp; <span class="dot" style="background:var(--inc)"></span>доходы</div>
@@ -262,6 +313,7 @@ textarea{height:46vh;font-size:13px}
       <button class="btn" id="csvAll">Вся история (CSV)</button>
       <button class="btn" id="copyTxt">Скопировать текстом</button>
     </div>
+  </div>
   </div>
   <div class="install" id="installCard" hidden>
     <div class="t">Добавить на главный экран<small>Откроется как обычное приложение</small></div>
@@ -350,6 +402,89 @@ textarea{height:46vh;font-size:13px}
   </div>
 </div>
 
+<div class="drawer-bg" id="menuBg">
+  <div class="drawer">
+    <h1>Меню</h1>
+    <h2>Разделы</h2>
+    <button class="mi" id="miRec">🔁 Регулярные платежи</button>
+    <button class="mi" id="miLim">🎯 Лимиты по категориям</button>
+    <h2 style="margin-top:18px">Показывать на главной</h2>
+    <label class="chk"><input type="checkbox" id="shStats"> Статистика покупок</label>
+    <label class="chk"><input type="checkbox" id="shTop"> Самые крупные покупки</label>
+    <label class="chk"><input type="checkbox" id="shTrend"> Расходы и доходы за 6 месяцев</label>
+    <div class="hint">Статистика и крупные покупки видны на вкладке «Общие».</div>
+    <button class="cancel" id="menuClose" style="margin-top:14px">Закрыть</button>
+  </div>
+</div>
+
+<div class="sheet-bg" id="loanBg">
+  <div class="sheet" role="dialog" aria-label="Долг">
+    <div class="seg" id="lDir">
+      <button data-v="owe">Я должен</button>
+      <button data-v="owed">Мне должны</button>
+    </div>
+    <label>Вид</label>
+    <div class="chips" id="lKind"></div>
+    <label>Чей долг</label>
+    <div class="seg" id="lWho">
+      <button data-v="d">Даня</button>
+      <button data-v="a">Аля</button>
+      <button data-v="s">Общий</button>
+    </div>
+    <label for="lName">Название</label>
+    <input id="lName" type="text" maxlength="40" placeholder="Например: Алатау, ипотека, Серик" autocomplete="off">
+    <label for="lTotal">Общая сумма (сколько взяли), ₸</label>
+    <input id="lTotal" class="sm" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <label for="lBal">Остаток сейчас, ₸</label>
+    <input id="lBal" class="sm" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <div class="hint" id="lHint"></div>
+    <label for="lRate">Ставка, % годовых</label>
+    <input id="lRate" class="sm" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <label for="lPay">Платёж в месяц, ₸</label>
+    <input id="lPay" class="sm" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <label for="lDay">День платежа (1–31)</label>
+    <input id="lDay" class="sm" type="text" inputmode="numeric" placeholder="1" autocomplete="off">
+    <label for="lEnd">Когда закончится (если знаешь)</label>
+    <input id="lEnd" type="date">
+    <button class="save" id="lSave">Сохранить</button>
+    <button class="danger" id="lDel" hidden>Удалить долг</button>
+    <button class="cancel" id="lCancel">Отмена</button>
+  </div>
+</div>
+
+<div class="sheet-bg" id="recBg">
+  <div class="sheet" role="dialog" aria-label="Регулярные платежи">
+    <h2 style="margin-bottom:6px">Регулярные платежи</h2>
+    <div class="note">Внеси один раз. В нужный день каждого месяца расход появится сам.</div>
+    <div id="recList"></div>
+    <label id="rTitle" style="margin-top:14px">Новый платёж</label>
+    <div class="seg" id="rWho">
+      <button data-v="d">Даня</button>
+      <button data-v="a">Аля</button>
+    </div>
+    <input id="rName" type="text" maxlength="40" placeholder="Название: аренда, интернет, спортзал" autocomplete="off">
+    <label for="rAmt">Сумма, ₸</label>
+    <input id="rAmt" class="sm" type="text" inputmode="decimal" placeholder="0" autocomplete="off">
+    <label for="rDay">День месяца (1–31)</label>
+    <input id="rDay" class="sm" type="text" inputmode="numeric" placeholder="1" autocomplete="off">
+    <label>Категория</label>
+    <div class="chips" id="rCat"></div>
+    <button class="save" id="rSave">Добавить</button>
+    <button class="danger" id="rDel" hidden>Удалить платёж</button>
+    <button class="cancel" id="rClose">Закрыть</button>
+  </div>
+</div>
+
+<div class="sheet-bg" id="limBg">
+  <div class="sheet" role="dialog" aria-label="Лимиты">
+    <h2 style="margin-bottom:6px">Лимиты на месяц</h2>
+    <div class="note">Сколько можно потратить на категорию за месяц всей семьёй. Пусто — без лимита.</div>
+    <div id="limRows"></div>
+    <button class="save" id="limSave">Сохранить</button>
+    <button class="cancel" id="limCancel">Отмена</button>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script>
 (function(){
@@ -378,7 +513,10 @@ textarea{height:46vh;font-size:13px}
 
   function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
   function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-  var st=lsGet("bt_tab");if(st==="d"||st==="a"||st==="all")tab=st;
+  var st=lsGet("bt_tab");if(st==="d"||st==="a"||st==="all"||st==="loans")tab=st;
+  var show={stats:false,top:false,trend:false};
+  try{var sh=JSON.parse(lsGet("bt_show")||"{}");["stats","top","trend"].forEach(function(k){show[k]=sh[k]===true})}catch(e){}
+  var loans=[],recs=[],limits={},recTried={};
 
   function pad(n){return String(n).padStart(2,"0")}
   function ymd(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
@@ -430,16 +568,22 @@ textarea{height:46vh;font-size:13px}
 
   function render(){
     renderTabs();
+    var isLoans=tab==="loans";
+    $("mainView").hidden=isLoans;$("loansView").hidden=!isLoans;
+    $("add").textContent=isLoans?"＋ Долг":"＋ Добавить";
+    if(isLoans){renderLoans();return}
     $("mname").textContent=MONTHS[cur.m]+" "+cur.y;
     var isAll=tab==="all";
     var base=inMonth(scope(),cur.y,cur.m);
     var T=totals(base);
     $("inc").textContent=fmt(T.inc);$("exp").textContent=fmt(T.exp);
     renderMoney(isAll,T);
-    $("splitCard").hidden=!isAll;$("statsCard").hidden=!isAll;$("topCard").hidden=!isAll;
+    renderFree(base,T);renderLimits(isAll,base);
+    $("trendCard").hidden=!show.trend;
+    $("splitCard").hidden=!isAll;$("statsCard").hidden=!(isAll&&show.stats);$("topCard").hidden=!(isAll&&show.top);
     $("whoChips").hidden=!isAll;$("exportBtns").hidden=!isAll;
     $("listTitle").textContent=isAll?"Выписка — все операции":"Операции";
-    if(isAll){renderSplit(base,T);renderStats(base,T);renderTop(base)}
+    if(isAll){renderSplit(base,T);if(show.stats)renderStats(base,T);if(show.top)renderTop(base)}
     renderCats(base,T,isAll);renderTrend();renderFilters(base,isAll);renderList(base);
   }
 
@@ -647,16 +791,23 @@ textarea{height:46vh;font-size:13px}
     return Promise.all([
       sb.from("tx").select("*").order("date",{ascending:false}).limit(10000),
       sb.from("cats").select("*"),
-      sb.from("accounts").select("*")
+      sb.from("accounts").select("*"),
+      sb.from("loans").select("*"),
+      sb.from("recurring").select("*"),
+      sb.from("limits").select("*")
     ]).then(function(res){
       if(res[0].error){setStatus("Не удалось загрузить операции.");return}
       txs=(res[0].data||[]).map(mapRow);
+      if(!res[3].error)loans=(res[3].data||[]).map(mapLoan).sort(function(a,b){return a.sort-b.sort});
+      if(!res[4].error)recs=(res[4].data||[]).map(function(r){return {id:r.id,who:r.who,name:r.name,amount:Number(r.amount)||0,day:Number(r.day)||1,cat:r.cat||"Прочее",start:r.start_month,skips:Array.isArray(r.skips)?r.skips:[]}});
+      if(!res[5].error){limits={};(res[5].data||[]).forEach(function(l){limits[l.cat]=Number(l.amount)||0})}
       if(!res[2].error)accounts=(res[2].data||[]).map(function(a){return {id:a.id,who:a.who,name:a.name,kind:a.kind,balance:Number(a.balance)||0,ts:Number(a.ts)||0,sort:Number(a.sort)||0}});
       (res[1].data||[]).forEach(function(c){
         if((c.kind==="expense"||c.kind==="income")&&Array.isArray(c.items)&&c.items.length)cats[c.kind]=c.items.slice();
       });
       setStatus("");
-      if(!$("bg").classList.contains("open")&&!$("balBg").classList.contains("open"))render();
+      applyRecurring();
+      if(!busy())render();
     }).catch(function(){setStatus("Нет связи. Данные обновятся, когда появится интернет.")});
   }
   function saveCats(){
@@ -746,7 +897,7 @@ textarea{height:46vh;font-size:13px}
     $("newCat").value="";form.cat=v;drawSheet();
   };
   $("newCat").addEventListener("keydown",function(e){if(e.key==="Enter"){e.preventDefault();$("addCatBtn").click()}});
-  $("add").onclick=function(){openSheet(null)};
+  $("add").onclick=function(){if(tab==="loans")openLoan(null);else openSheet(null)};
   $("xferBtn").onclick=function(){openSheet(null,true)};
   $("cancel").onclick=closeSheet;
   $("bg").addEventListener("click",function(e){if(e.target===$("bg"))closeSheet()});
@@ -830,14 +981,334 @@ textarea{height:46vh;font-size:13px}
     },function(){$("balSave").disabled=false;setStatus("Нет связи, остатки не сохранены.")});
   };
 
+  /* ---------- свободные деньги и лимиты ---------- */
+  function renderFree(base,T){
+    var inS=function(w){return tab==="all"||w===tab};
+    var lm=0;loans.forEach(function(l){if(l.dir!=="owed"&&inS(l.who)&&loanNow(l)>0)lm+=l.payment});
+    var rm=0;recs.forEach(function(r){if(inS(r.who))rm+=r.amount});
+    var sp=0;base.forEach(function(t){if(isExp(t)&&t.cat!=="Кредиты"&&String(t.id).indexOf("rec-")!==0)sp+=amt(t)});
+    var free=T.inc-lm-rm-sp;
+    var f=$("free");f.textContent=fmt(free);f.className="fbig"+(free<0?" neg":"");
+    var box=$("freeRows");box.textContent="";
+    [["Доходы",fmt(T.inc)],["Кредиты в месяц","− "+fmt(lm)],["Регулярные платежи","− "+fmt(rm)],["Остальные траты","− "+fmt(sp)]].forEach(function(p){
+      var r=el("div","frow");r.appendChild(el("span",null,p[0]));r.appendChild(el("span",null,p[1]));box.appendChild(r);
+    });
+  }
+  function renderLimits(isAll,base){
+    var keys=Object.keys(limits).filter(function(c){return limits[c]>0});
+    $("limCard").hidden=!(isAll&&keys.length);
+    var box=$("limList");box.textContent="";
+    if(!isAll)return;
+    var sp={};base.forEach(function(t){if(isExp(t))sp[t.cat]=(sp[t.cat]||0)+amt(t)});
+    keys.sort(function(a,b){return (sp[b]||0)/limits[b]-(sp[a]||0)/limits[a]}).forEach(function(c){
+      var s=sp[c]||0,L=limits[c],over=s>L;
+      var r=el("div","cat lim"+(over?" over":""));var top=el("div","top");
+      top.appendChild(el("span",null,catIcon(c,"expense")+" "+catLabel(c)));
+      top.appendChild(el("span",null,fmt(s)+" из "+fmt(L)));
+      var bar=el("div","bar");var i=el("i");i.style.width=Math.min(100,s/L*100)+"%";bar.appendChild(i);
+      r.appendChild(top);r.appendChild(bar);
+      r.appendChild(el("div","sub",over?"Перерасход "+fmt(s-L):"Осталось "+fmt(L-s)));
+      box.appendChild(r);
+    });
+  }
+
+  /* ---------- кредиты ---------- */
+  var KIND_L={mortgage:"Ипотека",loan:"Кредит",installment:"Рассрочка",personal:"Личный долг"};
+  var KIND_LP={mortgage:"Ипотека",loan:"Кредиты",installment:"Рассрочки",personal:"Личные долги"};
+  var KIND_LI={mortgage:"🏠",loan:"🏦",installment:"🛍️",personal:"🤝"};
+  var LKINDS=["mortgage","loan","installment","personal"];
+  var loanWho=null;
+  function mapLoan(r){return {id:r.id,who:r.who,kind:r.kind,dir:r.dir,name:r.name,total:Number(r.total)||0,balance:Number(r.balance)||0,ts:Number(r.ts)||0,rate:Number(r.rate)||0,payment:Number(r.payment)||0,day:Number(r.pay_day)||1,end:r.end_date||"",sort:Number(r.sort)||0}}
+  function dimOf(y,m){return new Date(y,m+1,0).getDate()}
+  /* остаток сейчас: от введённого остатка прошли все платёжные дни, что уже наступили */
+  function loanNow(l){
+    var b=l.balance,r=l.rate/1200,today=new Date(),an=new Date(l.ts);
+    if(l.payment>0&&l.ts){
+      var y=an.getFullYear(),m=an.getMonth();
+      for(var g=0;g<720;g++){
+        var pd=new Date(y,m,Math.min(l.day,dimOf(y,m)));
+        if(pd>today)break;
+        if(pd>an&&b>0)b=Math.max(0,b*(1+r)-l.payment);
+        m++;if(m>11){m=0;y++}
+      }
+    }
+    return Math.round(b);
+  }
+  function loanForecast(l,b){
+    if(b<=0)return {done:true};
+    if(l.payment<=0)return {noplan:true};
+    var r=l.rate/1200,x=b,n=0,intr=0;
+    if(l.payment<=b*r+0.005)return {stuck:true};
+    while(x>0.005&&n<1200){intr+=x*r;x=x*(1+r)-l.payment;n++}
+    var t=new Date(),y=t.getFullYear(),m=t.getMonth();
+    if(!(Math.min(l.day,dimOf(y,m))>t.getDate())){m++}
+    var e=new Date(y,m+n-1,1);
+    return {n:n,intr:intr,endY:e.getFullYear(),endM:e.getMonth()};
+  }
+  function monthsText(n){var y=Math.floor(n/12),m=n%12;return (y?y+" г ":"")+(m||!y?m+" мес":"")}
+  function loanRow(l){
+    var b=loanNow(l),f=loanForecast(l,b);
+    var box=el("div","loan");
+    var r=el("div","acc");
+    var ic=el("div","ico",KIND_LI[l.kind]||"🏦");if(l.who!=="s")ic.appendChild(el("b",l.who));
+    r.appendChild(ic);
+    var n=el("div","an",l.name);
+    var sm=b>0?(l.payment>0?fmt(l.payment)+" в месяц · "+l.day+"-го":"без графика"):"✅ закрыт";
+    if(l.rate>0)sm+=" · "+String(l.rate).replace(".",",")+"%";
+    if(l.who==="s")sm+=" · общий";
+    n.appendChild(el("small",null,sm));
+    r.appendChild(n);
+    var av=el("div","av",fmt(b));r.appendChild(av);
+    box.appendChild(r);
+    if(l.total>0){
+      var pct=Math.max(0,Math.min(100,(1-b/l.total)*100));
+      var bar=el("div","bar");var i=el("i");i.style.width=pct+"%";bar.appendChild(i);box.appendChild(bar);
+      var tx="выплачено "+fmt(Math.max(0,l.total-b))+" из "+fmt(l.total)+" ("+Math.round(pct)+"%)";
+      if(f.n)tx+=" · осталось "+monthsText(f.n)+" (до "+MSHORT[f.endM]+" "+f.endY+")";
+      else if(f.stuck)tx+=" · платёж не покрывает проценты";
+      else if(f.noplan&&l.end)tx+=" · до "+dm(l.end)+"."+l.end.slice(0,4);
+      box.appendChild(el("div","sub",tx));
+      if(f.n&&f.intr>1)box.appendChild(el("div","sub","переплата по процентам ещё ≈ "+fmt(Math.round(f.intr))));
+    }
+    box.onclick=function(){openLoan(l)};
+    return box;
+  }
+  function renderLoans(){
+    var fc=$("lFilter");fc.textContent="";
+    [[null,"Все"],["d","Даня"],["a","Аля"],["s","Общие"]].forEach(function(p){
+      var b=el("button",loanWho===p[0]?"on":"",p[1]);b.onclick=function(){loanWho=p[0];renderLoans()};fc.appendChild(b);
+    });
+    var list=loans.filter(function(l){return !loanWho||l.who===loanWho});
+    var owe=list.filter(function(l){return l.dir!=="owed"}),owed=list.filter(function(l){return l.dir==="owed"});
+    var mon=0,debt=0,byK={};
+    LKINDS.forEach(function(k){byK[k]={m:0,d:0,list:[]}});
+    owe.forEach(function(l){
+      var b=loanNow(l),o=byK[l.kind]||byK.loan;
+      o.list.push(l);o.d+=b;debt+=b;if(b>0){o.m+=l.payment;mon+=l.payment}
+    });
+    $("lMonth").textContent=fmt(mon);
+    var owedSum=0;owed.forEach(function(l){owedSum+=loanNow(l)});
+    $("lSub").textContent="Всего должен: "+fmt(debt)+(owed.length?" · Мне должны: "+fmt(owedSum):"");
+    var pills=$("lPills");pills.textContent="";
+    LKINDS.forEach(function(k){
+      var p=el("div","pill");p.appendChild(el("div","pn",KIND_LI[k]+" "+KIND_LP[k]));p.appendChild(el("div","pv",fmt(byK[k].m)));pills.appendChild(p);
+    });
+    var box=$("lList");box.textContent="";
+    if(!list.length){box.appendChild(el("div","card empty","Долгов пока нет. Нажми «＋ Долг» и впиши первый."));return}
+    LKINDS.forEach(function(k){
+      var o=byK[k];if(!o.list.length)return;
+      var c=el("div","card");
+      var h=el("div","lrow");h.appendChild(el("h2",null,KIND_LP[k]));
+      var hs=el("div","bal-label",fmt(o.m)+" / мес · долг "+fmt(o.d));hs.style.marginBottom="14px";h.appendChild(hs);
+      c.appendChild(h);
+      o.list.forEach(function(l){c.appendChild(loanRow(l))});
+      box.appendChild(c);
+    });
+    if(owed.length){
+      var c2=el("div","card");
+      var h2=el("div","lrow");h2.appendChild(el("h2",null,"Мне должны"));
+      var s2=el("div","bal-label","всего "+fmt(owedSum));s2.style.marginBottom="14px";h2.appendChild(s2);
+      c2.appendChild(h2);owed.forEach(function(l){c2.appendChild(loanRow(l))});box.appendChild(c2);
+    }
+  }
+
+  var lf={id:null,dir:"owe",kind:"loan",who:"d"},lCur=null;
+  function numStr(v){return v?String(v).replace(".",","):""}
+  function drawLoan(){
+    Array.prototype.forEach.call($("lDir").children,function(b){b.classList.toggle("on",b.getAttribute("data-v")===lf.dir)});
+    Array.prototype.forEach.call($("lWho").children,function(b){b.classList.toggle("on",b.getAttribute("data-v")===lf.who)});
+    var c=$("lKind");c.textContent="";
+    LKINDS.forEach(function(k){var b=el("button",lf.kind===k?"on":"",KIND_LI[k]+" "+KIND_L[k]);b.onclick=function(){lf.kind=k;drawLoan()};c.appendChild(b)});
+  }
+  function openLoan(l){
+    lCur=l||null;
+    if(l){
+      lf={id:l.id,dir:l.dir,kind:l.kind,who:l.who};
+      $("lName").value=l.name;$("lTotal").value=numStr(l.total);$("lBal").value=numStr(loanNow(l));
+      $("lRate").value=numStr(l.rate);$("lPay").value=numStr(l.payment);$("lDay").value=String(l.day);$("lEnd").value=l.end||"";
+      $("lHint").textContent="Остаток приложение считает само по платежам. Если не сходится с банком — поправь вручную.";
+      $("lDel").hidden=false;
+    }else{
+      lf={id:null,dir:"owe",kind:"loan",who:(loanWho||(me==="a"?"a":"d"))};
+      ["lName","lTotal","lBal","lRate","lPay","lEnd"].forEach(function(i){$(i).value=""});$("lDay").value="";
+      $("lHint").textContent="Не знаешь остаток — оставь пустым, возьму общую сумму.";
+      $("lDel").hidden=true;
+    }
+    drawLoan();$("loanBg").classList.add("open");
+    if(!l)setTimeout(function(){$("lName").focus()},50);
+  }
+  $("lDir").addEventListener("click",function(e){var v=e.target.getAttribute("data-v");if(!v)return;lf.dir=v;drawLoan()});
+  $("lWho").addEventListener("click",function(e){var v=e.target.getAttribute("data-v");if(!v)return;lf.who=v;drawLoan()});
+  $("lCancel").onclick=function(){$("loanBg").classList.remove("open");loadAll()};
+  $("loanBg").addEventListener("click",function(e){if(e.target===$("loanBg")){$("loanBg").classList.remove("open");loadAll()}});
+  $("lSave").onclick=function(){
+    var name=$("lName").value.trim();if(!name){$("lName").focus();return}
+    var total=num($("lTotal").value),balS=$("lBal").value.trim();
+    var bal=balS===""?(lCur?loanNow(lCur):total):num(balS);
+    if(!total)total=bal;
+    var day=Math.round(num($("lDay").value))||1;day=Math.max(1,Math.min(31,day));
+    var rec={id:lf.id||("l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),who:lf.who,kind:lf.kind,dir:lf.dir,name:name,total:total,balance:Math.round(bal*100)/100,ts:Date.now(),rate:num($("lRate").value),payment:num($("lPay").value),pay_day:day,end_date:$("lEnd").value||null,sort:lCur?lCur.sort:(loans.reduce(function(m,x){return Math.max(m,x.sort)},0)+1)};
+    $("lSave").disabled=true;
+    sb.from("loans").upsert(rec).then(function(r){
+      $("lSave").disabled=false;$("loanBg").classList.remove("open");
+      if(r.error){setStatus("Не удалось сохранить долг: "+r.error.message);return}
+      loanWho=loanWho&&loanWho!==rec.who?null:loanWho;
+      loadAll().then(render);
+    },function(){$("lSave").disabled=false;setStatus("Нет связи, долг не сохранён.")});
+  };
+  var lDelArm=false;
+  $("lDel").onclick=function(){
+    var b=$("lDel");
+    if(!lDelArm){lDelArm=true;b.textContent="Точно удалить? Нажми ещё раз";setTimeout(function(){lDelArm=false;b.textContent="Удалить долг"},3000);return}
+    lDelArm=false;b.textContent="Удалить долг";
+    if(!lf.id)return;
+    sb.from("loans").delete().eq("id",lf.id).then(function(r){
+      if(r.error)setStatus("Не удалось удалить: "+r.error.message);
+      $("loanBg").classList.remove("open");loadAll().then(render);
+    });
+  };
+
+  /* ---------- регулярные платежи ---------- */
+  var rf={id:null,who:"d",cat:null};
+  function applyRecurring(){
+    if(!recs.length)return;
+    var have={};txs.forEach(function(t){have[t.id]=1});
+    var today=new Date(),out=[],ts=Date.now();
+    recs.forEach(function(r){
+      if(!r.start)return;
+      var p=r.start.split("-"),y=+p[0],m=+p[1]-1;
+      for(var g=0;g<36;g++){
+        var d=new Date(y,m+g,1);if(d>today)break;
+        var key=mkey(d.getFullYear(),d.getMonth());
+        if(r.skips.indexOf(key)>=0)continue;
+        var due=new Date(d.getFullYear(),d.getMonth(),Math.min(r.day,dimOf(d.getFullYear(),d.getMonth())));
+        if(due>today)continue;
+        var id="rec-"+r.id+"-"+key;
+        if(have[id]||recTried[id])continue;
+        recTried[id]=1;
+        out.push({id:id,type:"expense",amount:r.amount,cat:r.cat,note:r.name,date:ymd(due),who:r.who,acc:null,acc2:null,ts:ts});
+      }
+    });
+    if(!out.length)return;
+    sb.from("tx").upsert(out).then(function(x){if(!x.error)loadAll()});
+  }
+  function drawRec(){
+    Array.prototype.forEach.call($("rWho").children,function(b){b.classList.toggle("on",b.getAttribute("data-v")===rf.who)});
+    var c=$("rCat");c.textContent="";
+    var l=cats.expense.slice();if(rf.cat&&l.indexOf(rf.cat)<0)l.push(rf.cat);
+    l.forEach(function(n){var b=el("button",rf.cat===n?"on":"",catIcon(n,"expense")+" "+catLabel(n));b.onclick=function(){rf.cat=n;drawRec()};c.appendChild(b)});
+    var box=$("recList");box.textContent="";
+    if(!recs.length)box.appendChild(el("div","empty","Пока пусто"));
+    var tot=0;
+    recs.forEach(function(r){
+      tot+=r.amount;
+      var row=el("div","acc");row.style.cursor="pointer";
+      row.appendChild(el("div","ico","🔁"));
+      var n=el("div","an",r.name);n.appendChild(el("small",null,whoName(r.who)+" · "+r.day+"-го · "+catLabel(r.cat)));
+      row.appendChild(n);row.appendChild(el("div","av",fmt(r.amount)));
+      row.onclick=function(){fillRec(r)};
+      box.appendChild(row);
+    });
+    if(recs.length)box.appendChild(el("div","bal-label","Всего в месяц: "+fmt(tot)));
+  }
+  function fillRec(r){
+    if(r){rf={id:r.id,who:r.who,cat:r.cat};$("rName").value=r.name;$("rAmt").value=numStr(r.amount);$("rDay").value=String(r.day);$("rTitle").textContent="Изменить платёж";$("rSave").textContent="Сохранить";$("rDel").hidden=false}
+    else{rf={id:null,who:(me==="a"?"a":"d"),cat:null};$("rName").value="";$("rAmt").value="";$("rDay").value="";$("rTitle").textContent="Новый платёж";$("rSave").textContent="Добавить";$("rDel").hidden=true}
+    drawRec();
+  }
+  function openRec(){fillRec(null);$("recBg").classList.add("open")}
+  $("rWho").addEventListener("click",function(e){var v=e.target.getAttribute("data-v");if(!v)return;rf.who=v;drawRec()});
+  function closeRec(){$("recBg").classList.remove("open");loadAll().then(render)}
+  $("rClose").onclick=closeRec;
+  $("recBg").addEventListener("click",function(e){if(e.target===$("recBg"))closeRec()});
+  $("rSave").onclick=function(){
+    var name=$("rName").value.trim(),a=num($("rAmt").value),day=Math.max(1,Math.min(31,Math.round(num($("rDay").value))||0));
+    if(!name){$("rName").focus();return}
+    if(a<=0){$("rAmt").focus();return}
+    if(!day){$("rDay").focus();return}
+    var old=rf.id?recs.filter(function(x){return x.id===rf.id})[0]:null;
+    var t=new Date(),nm=new Date(t.getFullYear(),t.getMonth()+1,1);
+    var sm=old?old.start:(day>t.getDate()?mkey(t.getFullYear(),t.getMonth()):mkey(nm.getFullYear(),nm.getMonth()));
+    var rec={id:rf.id||("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),who:rf.who,name:name,amount:a,day:day,cat:rf.cat||"Прочее",start_month:sm,skips:old?old.skips:[]};
+    $("rSave").disabled=true;
+    sb.from("recurring").upsert(rec).then(function(r){
+      $("rSave").disabled=false;
+      if(r.error){setStatus("Не удалось сохранить: "+r.error.message);return}
+      loadAll().then(function(){fillRec(null)});
+    },function(){$("rSave").disabled=false;setStatus("Нет связи.")});
+  };
+  var rDelArm=false;
+  $("rDel").onclick=function(){
+    var b=$("rDel");
+    if(!rDelArm){rDelArm=true;b.textContent="Точно удалить? Нажми ещё раз";setTimeout(function(){rDelArm=false;b.textContent="Удалить платёж"},3000);return}
+    rDelArm=false;b.textContent="Удалить платёж";
+    if(!rf.id)return;
+    sb.from("recurring").delete().eq("id",rf.id).then(function(r){
+      if(r.error)setStatus("Не удалось удалить: "+r.error.message);
+      loadAll().then(function(){fillRec(null)});
+    });
+  };
+
+  /* ---------- лимиты ---------- */
+  var limDraft={};
+  function openLim(){
+    var names=cats.expense.slice();Object.keys(limits).forEach(function(c){if(names.indexOf(c)<0)names.push(c)});
+    var box=$("limRows");box.textContent="";limDraft={};
+    names.forEach(function(c){
+      var r=el("div","erow");r.appendChild(el("div","ico",catIcon(c,"expense")));r.appendChild(el("div","en",catLabel(c)));
+      var inp=el("input","amount sm");inp.type="text";inp.setAttribute("inputmode","decimal");inp.setAttribute("data-c",c);inp.placeholder="без лимита";inp.autocomplete="off";
+      inp.value=limits[c]?numStr(limits[c]):"";
+      r.appendChild(inp);box.appendChild(r);
+    });
+    $("limBg").classList.add("open");
+  }
+  function closeLim(){$("limBg").classList.remove("open");loadAll().then(render)}
+  $("limCancel").onclick=closeLim;
+  $("limBg").addEventListener("click",function(e){if(e.target===$("limBg"))closeLim()});
+  $("limSave").onclick=function(){
+    var up=[],del=[],next={};
+    Array.prototype.forEach.call($("limRows").querySelectorAll("input"),function(i){
+      var c=i.getAttribute("data-c"),v=num(i.value);
+      if(v>0){up.push({cat:c,amount:v});next[c]=v}else if(limits[c])del.push(c);
+    });
+    $("limSave").disabled=true;
+    var jobs=[];
+    if(up.length)jobs.push(sb.from("limits").upsert(up));
+    if(del.length)jobs.push(sb.from("limits").delete().in("cat",del));
+    Promise.all(jobs).then(function(rs){
+      $("limSave").disabled=false;
+      var er=rs.filter(function(r){return r.error})[0];
+      if(er)setStatus("Не удалось сохранить лимиты: "+er.error.message);
+      closeLim();
+    },function(){$("limSave").disabled=false;setStatus("Нет связи, лимиты не сохранены.")});
+  };
+
+  /* ---------- боковое меню ---------- */
+  function openMenu(){$("shStats").checked=show.stats;$("shTop").checked=show.top;$("shTrend").checked=show.trend;$("menuBg").classList.add("open")}
+  function closeMenu(){$("menuBg").classList.remove("open")}
+  $("menuBtn").onclick=openMenu;
+  $("menuClose").onclick=closeMenu;
+  $("menuBg").addEventListener("click",function(e){if(e.target===$("menuBg"))closeMenu()});
+  [["shStats","stats"],["shTop","top"],["shTrend","trend"]].forEach(function(p){
+    $(p[0]).onchange=function(){show[p[1]]=this.checked;lsSet("bt_show",JSON.stringify(show));render()};
+  });
+  $("miRec").onclick=function(){closeMenu();openRec()};
+  $("miLim").onclick=function(){closeMenu();openLim()};
+
   var delArm=false;
   $("delBtn").onclick=function(){
     var b=$("delBtn");
     if(!delArm){delArm=true;b.textContent="Точно удалить? Нажми ещё раз";setTimeout(function(){delArm=false;b.textContent="Удалить операцию"},3000);return}
     delArm=false;b.textContent="Удалить операцию";
     if(!form.editId)return;
-    sb.from("tx").delete().eq("id",form.editId).then(function(r){
+    var did=form.editId,rm=/^rec-(.+)-(\d{4}-\d{2})$/.exec(did);
+    sb.from("tx").delete().eq("id",did).then(function(r){
       if(r.error)setStatus("Не удалось удалить: "+r.error.message);
+      else if(rm){
+        /* удалили автоплатёж за месяц — запоминаем, чтобы он не вернулся */
+        var rr=recs.filter(function(x){return x.id===rm[1]})[0];
+        if(rr&&rr.skips.indexOf(rm[2])<0){rr.skips.push(rm[2]);sb.from("recurring").update({skips:rr.skips}).eq("id",rr.id).then(function(){})}
+      }
       closeSheet();loadAll().then(render);
     });
   };
@@ -903,7 +1374,7 @@ textarea{height:46vh;font-size:13px}
   function signInWith(who,key){
     return sb.auth.signInWithPassword({email:EMAIL[who],password:key});
   }
-  function busy(){return $("bg").classList.contains("open")||$("balBg").classList.contains("open")}
+  function busy(){return ["bg","balBg","loanBg","recBg","limBg"].some(function(i){return $(i).classList.contains("open")})}
   function start(){
     sb.from("members").select("who").maybeSingle().then(function(r){
       if(r.error||!r.data){showApp(false);return}
@@ -915,6 +1386,9 @@ textarea{height:46vh;font-size:13px}
         var rt=null;function kick(){clearTimeout(rt);rt=setTimeout(loadAll,250)}
         sb.channel("fb-live").on("postgres_changes",{event:"*",schema:"public",table:"accounts"},kick).on("postgres_changes",{event:"*",schema:"public",table:"tx"},kick)
           .on("postgres_changes",{event:"*",schema:"public",table:"cats"},kick)
+          .on("postgres_changes",{event:"*",schema:"public",table:"loans"},kick)
+          .on("postgres_changes",{event:"*",schema:"public",table:"recurring"},kick)
+          .on("postgres_changes",{event:"*",schema:"public",table:"limits"},kick)
           .subscribe();
       }catch(e){}
       if(timer)clearInterval(timer);
